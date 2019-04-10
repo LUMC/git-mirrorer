@@ -19,6 +19,7 @@
 import argparse
 import subprocess
 from pathlib import Path
+from typing import List
 
 
 def argument_parser() -> argparse.ArgumentParser:
@@ -33,4 +34,19 @@ def argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
+class GitRepo(object):
+    def __init__(self,
+                 main_url: str,
+                 mirror_urls: List[str],
+                 repo_dir: Path):
+        self.main_url = main_url
+        self.mirror_urls = mirror_urls
+        self.repo_dir = repo_dir
+        self.exists = (self.repo_dir / Path(".git")).exists()
 
+    def clone_mirror(self):
+        if not self.exists:
+            subprocess.run(args=["git", "clone", "--mirror", self.main_url, self.repo_dir.absolute()])
+            self.exists = True
+
+    def
