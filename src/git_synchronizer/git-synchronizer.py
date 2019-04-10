@@ -23,9 +23,14 @@ from pathlib import Path
 
 def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--clone-dir", type=Path, required=True,
+    parser.add_argument("--clone-dir", type=Path,
                         help="Where repositories should be cloned on the "
                              "local machine.")
-    parser.add_argument("--main-git-url")
+    parser.add_argument("--main-git-url", )
     parser.add_argument("--mirror-git-url")
+    parser.add_argument("--config", type=Path,
+                        help="The configuration file")
     return parser
+
+
+
