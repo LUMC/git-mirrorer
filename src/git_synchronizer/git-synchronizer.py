@@ -19,7 +19,7 @@
 import argparse
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 
 def argument_parser() -> argparse.ArgumentParser:
@@ -27,8 +27,6 @@ def argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--clone-dir", type=Path,
                         help="Where repositories should be cloned on the "
                              "local machine.")
-    parser.add_argument("--main-git-url", )
-    parser.add_argument("--mirror-git-url")
     parser.add_argument("--config", type=Path,
                         help="The configuration file")
     return parser
@@ -58,3 +56,18 @@ class GitRepo(object):
             subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "push", "--all", mirror_url])
             subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "push", "--tags", mirror_url])
 
+
+def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
+    with config.open('rt') as config_h:
+        config_lines = config_h.readlines()
+    return [
+        (urls.split("\t")[0], urls.split("\t")[1:])
+        for urls in config_lines]
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()
