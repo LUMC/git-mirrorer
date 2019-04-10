@@ -51,4 +51,10 @@ class GitRepo(object):
             subprocess.run(args=["git", "clone", "--mirror", self.main_url, self.repo_dir.absolute()])
 
     def fetch(self):
-        subprocess.run(args=["git", "fetch"])
+        subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "fetch"])
+
+    def push_to_mirrors(self):
+        for mirror_url in self.mirror_urls:
+            subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "push", "--all", mirror_url])
+            subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "push", "--tags", mirror_url])
+
