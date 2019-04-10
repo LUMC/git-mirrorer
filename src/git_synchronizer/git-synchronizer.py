@@ -42,11 +42,13 @@ class GitRepo(object):
         self.main_url = main_url
         self.mirror_urls = mirror_urls
         self.repo_dir = repo_dir
-        self.exists = (self.repo_dir / Path(".git")).exists()
+
+    def exists(self):
+        return (self.repo_dir / Path(".git")).exists()
 
     def clone_mirror(self):
-        if not self.exists:
+        if not self.exists():
             subprocess.run(args=["git", "clone", "--mirror", self.main_url, self.repo_dir.absolute()])
-            self.exists = True
 
-    def
+    def fetch(self):
+        subprocess.run(args=["git", "fetch"])
