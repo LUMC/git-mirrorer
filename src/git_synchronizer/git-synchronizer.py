@@ -46,15 +46,26 @@ class GitRepo(object):
 
     def clone_mirror(self):
         if not self.exists():
-            subprocess.run(args=["git", "clone", "--mirror", self.main_url, self.repo_dir.absolute()])
+            subprocess.run(args=["git", "clone", "--mirror", self.main_url,
+                                 self.repo_dir.absolute()])
 
     def fetch(self):
         subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "fetch"])
 
     def push_to_mirrors(self):
         for mirror_url in self.mirror_urls:
-            subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "push", "--all", mirror_url])
-            subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "push", "--tags", mirror_url])
+            subprocess.run(
+                args=["git", "-C", self.repo_dir.absolute(), "push", "--all",
+                      mirror_url])
+            subprocess.run(
+                args=["git", "-C", self.repo_dir.absolute(), "push", "--tags",
+                      mirror_url])
+
+    def mirror(self):
+        """Mirrors the repo from the main git url to the miror git urls"""
+        self.clone_mirror()
+        self.fetch()
+        self.push_to_mirrors()
 
 
 def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
