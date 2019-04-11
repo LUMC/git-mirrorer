@@ -17,7 +17,9 @@
 # along with git-synchronizer.  If not, see <https://www.gnu.org/licenses/
 
 import argparse
+import queue
 import subprocess
+import threading
 from pathlib import Path
 from typing import List, Tuple
 
@@ -44,7 +46,7 @@ class GitRepo(object):
     def exists(self):
         return (self.repo_dir / Path(".git")).exists()
 
-    def clone_mirror(self):
+    def clone(self):
         if not self.exists():
             subprocess.run(args=["git", "clone", "--mirror", self.main_url,
                                  self.repo_dir.absolute()])
@@ -63,9 +65,24 @@ class GitRepo(object):
 
     def mirror(self):
         """Mirrors the repo from the main git url to the miror git urls"""
-        self.clone_mirror()
+        self.clone()
         self.fetch()
         self.push_to_mirrors()
+
+
+class RepoQueue(queue.Queue):
+    """A queue object that will hold git repos to be cloned and mirrored."""
+
+    def __init__(self):
+        # We will allow infinite sizes of queues
+        super().__init__()
+        # Allows is to store errors during processing
+        self._process_errors = []
+
+    def put(self, item, block=True, timeout=None):
+        """Like Queue.put(item) but tests if item is a repo."""
+
+
 
 
 def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
