@@ -29,8 +29,16 @@ def git_repository():
     git_mirror_2 = str(Path(tempfile.mkdtemp(suffix=".git", prefix="mirror2")))
     clone_dir = Path(str(tempfile.mkdtemp(prefix="clone_dir"))) / Path(
         "git-synchronizer.git")
+
     git_repo = GitRepo(main_url=main_git,
                        mirror_urls=[git_mirror_1, git_mirror_2],
-                       repo_dir=Path(str(clone_dir)) / Path(
-                           "git_synchronizer.git"))
-    return git_repo, git_mirror_1, git_mirror_2, clone_dir
+                       repo_dir=clone_dir)
+    return git_repo
+
+
+def test_exists(git_repository):
+    git_repo = git_repository
+    git_repo.repo_dir
+    assert git_repo.exists() is False
+    git_repo.repo_dir.touch()
+    assert git_repo.exists() is True
