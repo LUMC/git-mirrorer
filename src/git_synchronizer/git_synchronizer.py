@@ -17,6 +17,7 @@
 # along with git-synchronizer.  If not, see <https://www.gnu.org/licenses/
 
 import argparse
+import os
 import queue
 import subprocess
 import threading
@@ -117,9 +118,13 @@ class RepoQueue(queue.Queue):
 def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
     with config.open('rt') as config_h:
         config_lines = config_h.readlines()
-    return [
-        (urls.split("\t")[0], urls.split("\t")[1:])
-        for urls in config_lines]
+    config_list = []
+    for line in config_lines:
+        clean_line = line.strip(os.linesep)
+        source_url = clean_line.split('\t')[0]
+        dest_urls = clean_line.split('\t')[1:]
+        config_list.append((source_url, dest_urls))
+    return config_list
 
 
 def main():
