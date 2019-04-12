@@ -72,6 +72,7 @@ class GitRepo(object):
 
 class RepoQueue(queue.Queue):
     """A queue object that will hold git repos to be cloned and mirrored."""
+    # Example taken from pytest-workflow's queue implementation.
 
     def __init__(self):
         # We will allow infinite sizes of queues
@@ -81,8 +82,36 @@ class RepoQueue(queue.Queue):
 
     def put(self, item, block=True, timeout=None):
         """Like Queue.put(item) but tests if item is a repo."""
+        if isinstance(item, GitRepo):
+            super().put(item, block, timeout)
+        else:
+            raise ValueError("Only GitRepo objects can be submitted to this "
+                             "queue")
 
+    def worker(self):
+        """
+        Clones repos until the queue is empty.
+        """
+        while True:
+            try:
+                # We know the type is GitRepo, because this was enforced in
+                # the put method.
+                repo = self.get_nowait()  # type: GitRepo
+            except queue.Empty:
+                break
+            else:
+                repo.mirror()
+                self.task_done()
 
+    def process(self, number_of_threads: int = 1):
+        threads = []
+        for _ in range(number_of_threads):
+            thread = threading.Thread(target=self.worker)
+            thread.start()
+            threads.append(thread)
+        self.join()
+        for thread in threads:
+            thread.join()
 
 
 def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
