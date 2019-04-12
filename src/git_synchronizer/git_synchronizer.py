@@ -56,6 +56,7 @@ class GitRepo(object):
         """Mirrors the repo from the main git url to the miror git urls"""
         self.clone()
         self.fetch()
+        # NOTE: Pull is not needed in bare repos.
         self.push_to_mirrors()
 
 
