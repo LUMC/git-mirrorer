@@ -133,14 +133,14 @@ def argument_parser() -> argparse.ArgumentParser:
 def main():
     args = argument_parser().parse_args()
     clone_dir = args.clone_dir  # type: Path
-    configuration = parse_config(args.config)  # type: List[Tuple[str, List[str]]]
+    configuration = parse_config(args.config)  # type: List[Tuple[str, List[str]]]  # noqa: E501
     repo_queue = RepoQueue()
     for source_url, mirror_urls in configuration:
         git_repo = GitRepo(
             main_url=source_url,
             mirror_urls=mirror_urls,
             # Use the last part of the repo url to clone.
-            # https://github.com/LUMC/git-synchronizer.git -> git-synchronizer.git
+            # https://github.com/LUMC/git-synchronizer.git -> git-synchronizer.git  # noqa: E501
             repo_dir=clone_dir / Path(source_url.split('/')[-1])
         )
         repo_queue.put(git_repo)
