@@ -120,13 +120,17 @@ def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
 def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--clone-dir", type=Path, dest="clone_dir",
+                        required=True,
                         help="Where repositories should be cloned on the "
                              "local machine.")
-    parser.add_argument("--config", type=Path,
-                        help="The configuration file")
-    parser.add_argument("--threads", type=int,
-                        help="how many git operations will be performed at the"
-                             "same time.")
+    parser.add_argument("--config", type=Path, required=True,
+                        help="The tab delimited configuration file. In the "
+                             "form: \nmain_git_url<tab>mirror_git_url1<tab>"
+                             "mirror_git_url2 etc. Number of mirror_git_urls "
+                             "should be at least 1.")
+    parser.add_argument("--threads", type=int, default=1,
+                        help="how many git operations will be performed at "
+                             "the same time.")
     return parser
 
 

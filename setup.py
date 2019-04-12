@@ -46,4 +46,7 @@ setup(
     ],
     python_requires=">=3.5",  # Because we use type annotation.
     install_requires=[],
+    entry_points={"console_scripts": [
+        "git-synchronizer = git_synchronizer.git_synchronizer:main"
+    ]}
 )
