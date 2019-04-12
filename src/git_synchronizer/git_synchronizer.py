@@ -148,7 +148,7 @@ def main():
             repo_dir=clone_dir / Path(source_url.split('/')[-1])
         )
         repo_queue.put(git_repo)
-    repo_queue.process()
+    repo_queue.process(number_of_threads=args.threads)
 
 
 if __name__ == "__main__":
