@@ -34,25 +34,23 @@ class GitRepo(object):
         self.mirror_urls = mirror_urls
         self.repo_dir = repo_dir
 
-    def exists(self):
-        return (self.repo_dir / Path(".git")).exists()
-
     def clone(self):
-        if not self.exists():
+        if not self.repo_dir.exists():
             subprocess.run(args=["git", "clone", "--mirror", self.main_url,
-                                 self.repo_dir.absolute()])
+                                 str(self.repo_dir.absolute())])
 
     def fetch(self):
-        subprocess.run(args=["git", "-C", self.repo_dir.absolute(), "fetch"])
+        subprocess.run(args=["git", "-C", str(self.repo_dir.absolute()),
+                             "fetch"])
 
     def push_to_mirrors(self):
         for mirror_url in self.mirror_urls:
             subprocess.run(
-                args=["git", "-C", self.repo_dir.absolute(), "push", "--all",
-                      mirror_url])
+                args=["git", "-C", str(self.repo_dir.absolute()),
+                      "push", "--all", mirror_url])
             subprocess.run(
-                args=["git", "-C", self.repo_dir.absolute(), "push", "--tags",
-                      mirror_url])
+                args=["git", "-C", str(self.repo_dir.absolute()),
+                      "push", "--tags", mirror_url])
 
     def mirror(self):
         """Mirrors the repo from the main git url to the miror git urls"""
