@@ -25,16 +25,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 
-def argument_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--clone-dir", type=Path,
-                        help="Where repositories should be cloned on the "
-                             "local machine.")
-    parser.add_argument("--config", type=Path,
-                        help="The configuration file")
-    return parser
-
-
 class GitRepo(object):
     def __init__(self,
                  main_url: str,
@@ -127,8 +117,34 @@ def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
     return config_list
 
 
+def argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--clone-dir", type=Path, dest="clone_dir",
+                        help="Where repositories should be cloned on the "
+                             "local machine.")
+    parser.add_argument("--config", type=Path,
+                        help="The configuration file")
+    parser.add_argument("--threads", type=int,
+                        help="how many git operations will be performed at the"
+                             "same time.")
+    return parser
+
+
 def main():
-    pass
+    args = argument_parser().parse_args()
+    clone_dir = args.clone_dir  # type: Path
+    configuration = parse_config(args.config)  # type: List[Tuple[str, List[str]]]
+    repo_queue = RepoQueue()
+    for source_url, mirror_urls in configuration:
+        git_repo = GitRepo(
+            main_url=source_url,
+            mirror_urls=mirror_urls,
+            # Use the last part of the repo url to clone.
+            # https://github.com/LUMC/git-synchronizer.git -> git-synchronizer.git
+            repo_dir=clone_dir / Path(source_url.split('/')[-1])
+        )
+        repo_queue.put(git_repo)
+    repo_queue.process()
 
 
 if __name__ == "__main__":
