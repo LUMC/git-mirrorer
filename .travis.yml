@@ -11,6 +11,8 @@ matrix:
       install:
         - pip install tox codecov
       after_success:
+        # Coverage xml will by default list the stuff from tox's env which
+        # will confuse coverage services.
         - >
           bash -c 'set -eux;
           pkg_path=".tox/py35/lib/python3.5/site-packages/git_synchronizer" ;
