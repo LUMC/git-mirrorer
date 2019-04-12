@@ -16,6 +16,7 @@
 
 import tempfile
 from pathlib import Path
+
 from git_synchronizer.git_synchronizer import GitRepo
 
 import pytest
@@ -33,4 +34,3 @@ def git_repository():
                        repo_dir=Path(str(clone_dir)) / Path(
                            "git_synchronizer.git"))
     return git_repo, git_mirror_1, git_mirror_2, clone_dir
-
