@@ -22,7 +22,7 @@ import pytest
 
 
 @pytest.fixture()
-def git_repo():
+def git_repository():
     main_git = "https://github.com/LUMC/git-synchronizer.git"
     git_mirror_1 = str(Path(tempfile.mkdtemp(suffix=".git", prefix="mirror1")))
     git_mirror_2 = str(Path(tempfile.mkdtemp(suffix=".git", prefix="mirror2")))
