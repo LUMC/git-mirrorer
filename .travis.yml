@@ -1,0 +1,21 @@
+language: python
+install:
+  - pip install tox
+dist: xenial
+script:
+  - tox -e $TOX_ENV
+matrix:
+  include:
+    - python: 3.5
+      env: TOX_ENV=py35
+      install:
+        - pip install tox codecov
+      after_success:
+        - >
+          bash -c 'set -eux;
+          pkg_path=".tox/py35/lib/python3.5/site-packages/git_synchronizer" ;
+          sed -i "s:${pkg_path}:src/git_synchronizer:g" coverage.xml'
+    - python: 3.6
+      env: TOX_ENV=py36
+    - python: 3.7
+      env: TOX_ENV=py37
