@@ -46,3 +46,8 @@ def test_fetch(git_repository):
     git_repo = git_repository
     git_repo.clone()
     git_repo.fetch()
+
+
+def test_mirror(git_repository):
+    git_repo = git_repository
+    git_repo.mirror()
