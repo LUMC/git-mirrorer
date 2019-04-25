@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with git-synchronizer.  If not, see <https://www.gnu.org/licenses/
 
-import os
 import tempfile
 from pathlib import Path
 
@@ -41,6 +40,7 @@ def test_clone(git_repository):
     assert not git_repo.repo_dir.exists()
     git_repo.clone()
     assert git_repo.repo_dir.exists()
+
 
 def test_fetch(git_repository):
     git_repo = git_repository
