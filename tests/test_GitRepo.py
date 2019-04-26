@@ -50,5 +50,7 @@ def test_mirror(git_repository):
     git_repo.mirror()
     for mirror in git_repo.mirrors:
         mirror_repo = git.Repo(list(mirror.urls)[0])
+        print(git_repo.repo_dir)
+        print(mirror_repo.working_dir)
         assert mirror_repo.branches == git_repo.repo.branches
         assert mirror_repo.tags == git_repo.repo.tags

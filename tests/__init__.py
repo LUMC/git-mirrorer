@@ -29,5 +29,5 @@ def clone_this_repo() -> git.Repo:
 def empty_repo() -> git.Repo:
     temp_dir = Path(
         tempfile.mkdtemp(suffix=".git", prefix="mirror1")).absolute()
-    repo = git.Repo.init(str(temp_dir))
+    repo = git.Repo.init(str(temp_dir), bare=True)
     return repo
