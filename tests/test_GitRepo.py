@@ -17,12 +17,13 @@
 import tempfile
 from pathlib import Path
 
-from . import clone_this_repo, empty_repo
 import git
 
 from git_synchronizer.git_synchronizer import GitRepo
 
 import pytest
+
+from . import clone_this_repo, empty_repo
 
 
 @pytest.fixture()
