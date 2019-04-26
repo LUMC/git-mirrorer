@@ -172,7 +172,7 @@ def main():
     args = argument_parser().parse_args()
     clone_dir = args.clone_dir  # type: Path
     configuration = parse_config(
-        args.config)  # type: List[Tuple[str, List[str]]]  # noqa: E501
+        args.config)  # type: List[Tuple[str, List[str]]]
     repo_queue = RepoQueue()
     repos = []  # type: List[GitRepo]
     for source_url, mirror_urls in configuration:
