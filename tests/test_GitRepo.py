@@ -17,6 +17,8 @@
 import tempfile
 from pathlib import Path
 
+import git
+
 from git_synchronizer.git_synchronizer import GitRepo
 
 import pytest
@@ -24,12 +26,19 @@ import pytest
 
 @pytest.fixture()
 def git_repository():
-    main_git = "https://github.com/LUMC/git-synchronizer.git"
-    git_mirror_1 = str(Path(tempfile.mkdtemp(suffix=".git", prefix="mirror1")))
-    git_mirror_2 = str(Path(tempfile.mkdtemp(suffix=".git", prefix="mirror2")))
+    this_repo = Path(__file__).parent.parent
+    test_repo = git.Repo.clone_from("file://" + str(this_repo), Path(
+        tempfile.mkdtemp(suffix=".git", prefix="origin")).absolute())
+
+    git_mirror_1 = str(
+        Path(tempfile.mkdtemp(suffix=".git", prefix="mirror1")).absolute())
+    git_mirror_2 = str(
+        Path(tempfile.mkdtemp(suffix=".git", prefix="mirror2")).absolute())
+    git.Repo.init(git_mirror_1)
+    git.Repo.init(git_mirror_2)
     clone_dir = Path(str(tempfile.mkdtemp(prefix="clone_dir"))) / Path(
         "git-synchronizer.git")
-    git_repo = GitRepo(main_url=main_git,
+    git_repo = GitRepo(main_url=list(test_repo.remote().urls)[0],
                        mirror_urls=[git_mirror_1, git_mirror_2],
                        repo_dir=clone_dir)
     return git_repo
@@ -42,12 +51,10 @@ def test_clone(git_repository):
     assert git_repo.repo_dir.exists()
 
 
-def test_fetch(git_repository):
-    git_repo = git_repository
-    git_repo.clone()
-    git_repo.fetch()
-
-
 def test_mirror(git_repository):
     git_repo = git_repository
     git_repo.mirror()
+    for mirror in git_repo.mirrors:
+        mirror_repo = git.Repo(list(mirror.urls)[0])
+        assert mirror_repo.branches == git_repo.repo.branches
+        assert mirror_repo.tags == git_repo.repo.tags

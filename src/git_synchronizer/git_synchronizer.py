@@ -44,6 +44,7 @@ class GitRepo(object):
         self.main_url = main_url
         self.mirror_urls = mirror_urls
         self.mirrors = []  # type: List[git.Remote]
+        self.errors = []  # type: List[Exception]
         self.repo_dir = repo_dir
         if self.repo_dir.exists():
             self.repo = git.Repo(path=self.repo_dir)
@@ -81,6 +82,13 @@ class GitRepo(object):
         self.push_branches()
         self.push_tags()
 
+    @property
+    def branches(self) -> List[str]:
+        if self.repo is not None:
+            return [head.name for head in self.repo.branches]
+        else:
+            raise ValueError("Can only be performed on cloned repos.")
+
 
 class RepoQueue(queue.Queue):
     """A queue object that will hold git repos to be cloned and mirrored."""
@@ -113,8 +121,12 @@ class RepoQueue(queue.Queue):
             except queue.Empty:
                 break
             else:
-                repo.mirror()
-                self.task_done()
+                try:
+                    repo.mirror()
+                except (ValueError, git.GitError) as e:
+                    repo.errors.append(e)
+                finally:
+                    self.task_done()
 
     def process(self, number_of_threads: int = 1):
         threads = []
@@ -162,6 +174,7 @@ def main():
     configuration = parse_config(
         args.config)  # type: List[Tuple[str, List[str]]]  # noqa: E501
     repo_queue = RepoQueue()
+    repos = []  # type: List[GitRepo]
     for source_url, mirror_urls in configuration:
         git_repo = GitRepo(
             main_url=source_url,
@@ -170,8 +183,16 @@ def main():
             # https://github.com/LUMC/git-synchronizer.git -> git-synchronizer.git  # noqa: E501
             repo_dir=clone_dir / Path(source_url.split('/')[-1])
         )
+        repos.append(git_repo)
         repo_queue.put(git_repo)
     repo_queue.process(number_of_threads=args.threads)
+    errors = []  # type: List[Exception]
+    for repo in repos:
+        errors.extend(repo.errors)
+
+    if len(errors) > 0:
+        raise ValueError("errors were found: {0}".format(
+            [str(error) for error in errors]))
 
 
 if __name__ == "__main__":
