@@ -25,7 +25,9 @@ import threading
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+import git
 
+git.repo.Repo
 class GitRepo(object):
     def __init__(self,
                  main_url: str,

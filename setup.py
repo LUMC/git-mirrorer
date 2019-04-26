@@ -45,7 +45,7 @@ setup(
         "GNU Affero General Public License v3 or later (AGPLv3+)",
     ],
     python_requires=">=3.5",  # Because we use type annotation.
-    install_requires=[],
+    install_requires=["gitpython"],
     entry_points={"console_scripts": [
         "git-synchronizer = git_synchronizer.git_synchronizer:main"
     ]}

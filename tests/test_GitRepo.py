@@ -21,7 +21,6 @@ from git_synchronizer.git_synchronizer import GitRepo
 
 import pytest
 
-
 @pytest.fixture()
 def git_repository():
     main_git = "https://github.com/LUMC/git-synchronizer.git"
