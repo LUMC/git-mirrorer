@@ -17,6 +17,7 @@
 # along with git-synchronizer.  If not, see <https://www.gnu.org/licenses/
 
 import argparse
+import functools
 import os
 import queue
 import subprocess
@@ -34,29 +35,33 @@ class GitRepo(object):
         self.mirror_urls = mirror_urls
         self.repo_dir = repo_dir
         self.git_repo_args = ["git", "-C", str(self.repo_dir.absolute())]
+        self.run = functools.partial(
+            subprocess.run,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True
+        )
 
     def clone(self) -> Optional[subprocess.CompletedProcess]:
         if not self.repo_dir.exists():
-            return subprocess.run(
+            return self.run(
                 args=["git", "clone", "--mirror", self.main_url,
                       str(self.repo_dir.absolute())])
         else:
             return None
 
     def fetch(self) -> subprocess.CompletedProcess:
-        return subprocess.run(args=self.git_repo_args + ["fetch"])
+        return self.run(args=self.git_repo_args + ["fetch"])
 
     def push_branches(self) -> List[subprocess.CompletedProcess]:
         return [
-            subprocess.run(args=self.git_repo_args + ["push", "--all",
-                                                      mirror_url])
+            self.run(args=self.git_repo_args + ["push", "--all", mirror_url])
             for mirror_url in self.mirror_urls
         ]
 
     def push_tags(self) -> List[subprocess.CompletedProcess]:
         return [
-            subprocess.run(args=self.git_repo_args + ["push", "--tags",
-                                                      mirror_url])
+            self.run(args=self.git_repo_args + ["push", "--tags", mirror_url])
             for mirror_url in self.mirror_urls
         ]
 
