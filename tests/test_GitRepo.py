@@ -17,6 +17,7 @@
 import tempfile
 from pathlib import Path
 
+from . import clone_this_repo, empty_repo
 import git
 
 from git_synchronizer.git_synchronizer import GitRepo
@@ -26,20 +27,12 @@ import pytest
 
 @pytest.fixture()
 def git_repository():
-    this_repo = Path(__file__).parent.parent
-    test_repo = git.Repo.clone_from("file://" + str(this_repo), Path(
-        tempfile.mkdtemp(suffix=".git", prefix="origin")).absolute())
-
-    git_mirror_1 = str(
-        Path(tempfile.mkdtemp(suffix=".git", prefix="mirror1")).absolute())
-    git_mirror_2 = str(
-        Path(tempfile.mkdtemp(suffix=".git", prefix="mirror2")).absolute())
-    git.Repo.init(git_mirror_1)
-    git.Repo.init(git_mirror_2)
     clone_dir = Path(str(tempfile.mkdtemp(prefix="clone_dir"))) / Path(
         "git-synchronizer.git")
-    git_repo = GitRepo(main_url=list(test_repo.remote().urls)[0],
-                       mirror_urls=[git_mirror_1, git_mirror_2],
+
+    git_repo = GitRepo(main_url=list(clone_this_repo().remote().urls)[0],
+                       mirror_urls=[empty_repo().working_dir,
+                                    empty_repo().working_dir],
                        repo_dir=clone_dir)
     return git_repo
 
