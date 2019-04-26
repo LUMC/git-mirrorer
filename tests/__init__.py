@@ -22,8 +22,8 @@ import git
 
 def clone_this_repo() -> git.Repo:
     this_repo = Path(__file__).parent.parent
-    return git.Repo.clone_from(str(this_repo), Path(
-        tempfile.mkdtemp(suffix=".git", prefix="origin")).absolute())
+    return git.Repo.clone_from(str(this_repo), "file://" + str(Path(
+        tempfile.mkdtemp(suffix=".git", prefix="origin")).absolute()))
 
 
 def empty_repo() -> git.Repo:
