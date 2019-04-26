@@ -22,7 +22,7 @@ import queue
 import subprocess
 import threading
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 class GitRepo(object):
@@ -33,35 +33,45 @@ class GitRepo(object):
         self.main_url = main_url
         self.mirror_urls = mirror_urls
         self.repo_dir = repo_dir
+        self.git_repo_args = ["git", "-C", str(self.repo_dir.absolute())]
 
-    def clone(self):
+    def clone(self) -> Optional[subprocess.CompletedProcess]:
         if not self.repo_dir.exists():
-            subprocess.run(args=["git", "clone", "--mirror", self.main_url,
-                                 str(self.repo_dir.absolute())])
+            return subprocess.run(
+                args=["git", "clone", "--mirror", self.main_url,
+                      str(self.repo_dir.absolute())])
+        else:
+            return None
 
-    def fetch(self):
-        subprocess.run(args=["git", "-C", str(self.repo_dir.absolute()),
-                             "fetch"])
+    def fetch(self) -> subprocess.CompletedProcess:
+        return subprocess.run(args=self.git_repo_args + ["fetch"])
 
-    def push_to_mirrors(self):
-        for mirror_url in self.mirror_urls:
-            subprocess.run(
-                args=["git", "-C", str(self.repo_dir.absolute()),
-                      "push", "--all", mirror_url])
-            subprocess.run(
-                args=["git", "-C", str(self.repo_dir.absolute()),
-                      "push", "--tags", mirror_url])
+    def push_branches(self) -> List[subprocess.CompletedProcess]:
+        return [
+            subprocess.run(args=self.git_repo_args + ["push", "--all",
+                                                      mirror_url])
+            for mirror_url in self.mirror_urls
+        ]
+
+    def push_tags(self) -> List[subprocess.CompletedProcess]:
+        return [
+            subprocess.run(args=self.git_repo_args + ["push", "--tags",
+                                                      mirror_url])
+            for mirror_url in self.mirror_urls
+        ]
 
     def mirror(self):
         """Mirrors the repo from the main git url to the miror git urls"""
         self.clone()
         self.fetch()
         # NOTE: Pull is not needed in bare repos.
-        self.push_to_mirrors()
+        self.push_branches()
+        self.push_tags()
 
 
 class RepoQueue(queue.Queue):
     """A queue object that will hold git repos to be cloned and mirrored."""
+
     # Example taken from pytest-workflow's queue implementation.
 
     def __init__(self):
@@ -136,7 +146,8 @@ def argument_parser() -> argparse.ArgumentParser:
 def main():
     args = argument_parser().parse_args()
     clone_dir = args.clone_dir  # type: Path
-    configuration = parse_config(args.config)  # type: List[Tuple[str, List[str]]]  # noqa: E501
+    configuration = parse_config(
+        args.config)  # type: List[Tuple[str, List[str]]]  # noqa: E501
     repo_queue = RepoQueue()
     for source_url, mirror_urls in configuration:
         git_repo = GitRepo(
