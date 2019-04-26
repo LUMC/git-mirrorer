@@ -17,61 +17,67 @@
 # along with git-synchronizer.  If not, see <https://www.gnu.org/licenses/
 
 import argparse
-import functools
+import hashlib
 import os
 import queue
-import subprocess
 import threading
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import git
 
-git.repo.Repo
+
+def string_to_md5(string: str) -> str:
+    hasher = hashlib.md5()
+    hasher.update(string.encode("utf-8"))
+    return hasher.hexdigest()
+
+
 class GitRepo(object):
+    """Wrapper for using the git.Repo class in an automated way."""
+
     def __init__(self,
                  main_url: str,
                  mirror_urls: List[str],
                  repo_dir: Path):
+        self.repo = None  # type: Optional[git.Repo]
         self.main_url = main_url
         self.mirror_urls = mirror_urls
+        self.mirrors = []  # type: List[git.Remote]
         self.repo_dir = repo_dir
-        self.git_repo_args = ["git", "-C", str(self.repo_dir.absolute())]
-        self.run = functools.partial(
-            subprocess.run,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True
+        if self.repo_dir.exists():
+            self.repo = git.Repo(path=self.repo_dir)
+
+    def clone(self):
+        if self.repo is None:
+            self.repo = git.Repo.clone_from(
+                url=self.main_url,
+                to_path=self.repo_dir.absolute(),
+                mirror=True
+            )
+            for mirror_url in self.mirror_urls:
+                self.add_mirror(mirror_url)
+
+    def add_mirror(self, mirror_url):
+        self.mirrors.append(
+            git.Remote.add(self.repo, string_to_md5(mirror_url), mirror_url)
         )
 
-    def clone(self) -> Optional[subprocess.CompletedProcess]:
-        if not self.repo_dir.exists():
-            return self.run(
-                args=["git", "clone", "--mirror", self.main_url,
-                      str(self.repo_dir.absolute())])
-        else:
-            return None
+    def fetch(self):
+        self.repo.remote().fetch()
 
-    def fetch(self) -> subprocess.CompletedProcess:
-        return self.run(args=self.git_repo_args + ["fetch"])
+    def push_branches(self):
+        for remote in self.mirrors:
+            remote.push(all=True)
 
-    def push_branches(self) -> List[subprocess.CompletedProcess]:
-        return [
-            self.run(args=self.git_repo_args + ["push", "--all", mirror_url])
-            for mirror_url in self.mirror_urls
-        ]
-
-    def push_tags(self) -> List[subprocess.CompletedProcess]:
-        return [
-            self.run(args=self.git_repo_args + ["push", "--tags", mirror_url])
-            for mirror_url in self.mirror_urls
-        ]
+    def push_tags(self):
+        for remote in self.mirrors:
+            remote.push(tags=True)
 
     def mirror(self):
         """Mirrors the repo from the main git url to the miror git urls"""
         self.clone()
         self.fetch()
-        # NOTE: Pull is not needed in bare repos.
         self.push_branches()
         self.push_tags()
 
