@@ -14,13 +14,26 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from distutils.dist import DistributionMetadata
+from pathlib import Path
+
+import pkg_resources
+
+# Get package information from the installed package.
+package = pkg_resources.get_distribution("git_synchronizer")
+metadata_file = Path(package.egg_info) / Path(package.PKG_INFO)
+metadata = DistributionMetadata(path=str(metadata_file))
 
 # -- Project information -----------------------------------------------------
 
-project = 'git-synchronizer'
+project = metadata.name
 copyright = '2019, Leiden University Medical Center'
-author = 'Leiden University Medical Center'
+author = metadata.author
 
+# The short X.Y version
+version = package.parsed_version.base_version
+# The full version, including alpha/beta/rc tags
+release = package.version
 
 # -- General configuration ---------------------------------------------------
 
@@ -44,7 +57,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
