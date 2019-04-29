@@ -20,7 +20,7 @@ repositories.
 Git-synchronizer fetches all branches and tags from the main repository and
 pushes them to the mirror repositories.
 
-Git-synchronizer is optimized to work in a cron job. Main and mirror repo's are
+Git-synchronizer is optimized to work in a cron job. Main and mirror repos are
 set using a config file. Git-synchronizer supports fetching and pushing
 multiple repositories at once.
 
