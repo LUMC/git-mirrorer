@@ -17,7 +17,7 @@ Git-synchronizer is an application meant to synchronize git repositories
 with eachother. It can synchronize the main repository with one or more mirror
 repositories.
 
-Git-synchronizer fetches al branches and tags from the main repository and
+Git-synchronizer fetches all branches and tags from the main repository and
 pushes them to the mirror repositories.
 
 Git-synchronizer is optimized to work in a cron job. Main and mirror repo's are
