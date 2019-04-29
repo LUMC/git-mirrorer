@@ -22,7 +22,7 @@ import git
 
 def clone_this_repo() -> git.Repo:
     this_repo = Path(__file__).parent.parent
-    return git.Repo.clone_from(str(this_repo), "file://" + str(Path(
+    return git.Repo.clone_from(str(this_repo), str(Path(
         tempfile.mkdtemp(suffix=".git", prefix="origin")).absolute()))
 
 

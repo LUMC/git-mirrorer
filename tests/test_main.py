@@ -30,9 +30,9 @@ def config_file() -> Path:
     config = textwrap.dedent("""\
     {main_repo}\t{mirror_one}\t{mirror_two}
     """.format(
-        main_repo="file://" + clone_this_repo().working_dir,
-        mirror_one="file://" + empty_repo().working_dir,
-        mirror_two="file://" + empty_repo().working_dir
+        main_repo=clone_this_repo().working_dir,
+        mirror_one=empty_repo().working_dir,
+        mirror_two=empty_repo().working_dir
     ))
     _, temp_file = tempfile.mkstemp(prefix="config", suffix=".tsv")
     temp_path = Path(str(temp_file))
@@ -48,8 +48,8 @@ def test_main():
         config_lines = config_h.readlines()
     origin, mirror_one, mirror_two = config_lines[0].strip('\n').split('\t')[:]
     # [7:] removes the "file://" bit.
-    one = git.Repo(mirror_one[7:])
-    two = git.Repo(mirror_two[7:])
+    one = git.Repo(mirror_one)
+    two = git.Repo(mirror_two)
     assert len(one.branches) == 0
     assert len(two.branches) == 0
     sys.argv = [
