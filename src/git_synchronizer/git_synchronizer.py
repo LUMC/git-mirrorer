@@ -112,7 +112,7 @@ class RepoQueue(queue.Queue):
     def __init__(self):
         # We will allow infinite sizes of queues
         super().__init__()
-        # Allows is to store errors during processing
+        # This is to store errors during processing
         self._process_errors = []
 
     def put(self, item, block=True, timeout=None):
