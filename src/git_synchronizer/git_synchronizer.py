@@ -18,7 +18,6 @@
 
 import argparse
 import hashlib
-import os
 import queue
 import threading
 from pathlib import Path
@@ -158,7 +157,7 @@ def parse_config(config: Path) -> List[Tuple[str, List[str]]]:
         config_lines = config_h.readlines()
     config_list = []
     for line in config_lines:
-        clean_line = line.strip(os.linesep)
+        clean_line = line.strip()
         source_url = clean_line.split('\t')[0]
         dest_urls = clean_line.split('\t')[1:]
         config_list.append((source_url, dest_urls))
@@ -177,8 +176,8 @@ def argument_parser() -> argparse.ArgumentParser:
                              "mirror_git_url2 etc. Number of mirror_git_urls "
                              "should be at least 1.")
     parser.add_argument("--threads", type=int, default=1,
-                        help="The number of git operations which will be performed at "
-                             "the same time.")
+                        help="The number of git operations which will be "
+                             "performed at the same time.")
     return parser
 
 
