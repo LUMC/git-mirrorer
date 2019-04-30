@@ -177,7 +177,7 @@ def argument_parser() -> argparse.ArgumentParser:
                              "mirror_git_url2 etc. Number of mirror_git_urls "
                              "should be at least 1.")
     parser.add_argument("--threads", type=int, default=1,
-                        help="how many git operations will be performed at "
+                        help="The number of git operations which will be performed at "
                              "the same time.")
     return parser
 
