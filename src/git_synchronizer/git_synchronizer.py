@@ -38,16 +38,22 @@ class GitRepo(object):
 
     def __init__(self,
                  main_url: str,
-                 mirror_urls: List[str],
-                 repo_dir: Path):
-        self.repo = None  # type: Optional[git.Repo]
+                 repo_dir: Path,
+                 mirror_urls: Optional[List[str]] = None,
+                 ):
         self.main_url = main_url
-        self.mirror_urls = mirror_urls
+        self.mirror_urls = mirror_urls if mirror_urls is not None else []
         self.mirrors = []  # type: List[git.Remote]
         self.errors = []  # type: List[Exception]
         self.repo_dir = repo_dir
         if self.repo_dir.exists():
             self.repo = git.Repo(path=self.repo_dir)
+            self.repo.remote().set_url(main_url)
+            self.mirrors = [remote for remote in
+                            git.Remote.list_items(self.repo) if
+                            remote.name != "origin"]
+        else:
+            self.repo = None
 
     def clone(self):
         if self.repo is None:
@@ -60,12 +66,19 @@ class GitRepo(object):
                 self.add_mirror(mirror_url)
 
     def add_mirror(self, mirror_url):
-        self.mirrors.append(
-            git.Remote.add(self.repo, string_to_md5(mirror_url), mirror_url)
-        )
+        if self.repo is not None:
+            self.mirrors.append(
+                git.Remote.add(self.repo, string_to_md5(mirror_url), mirror_url)
+            )
+
+        else:
+            raise ValueError("Can only be performed on cloned repos.")
 
     def fetch(self):
-        self.repo.remote().fetch()
+        if self.repo is not None:
+            self.repo.remote().fetch()
+        else:
+            raise ValueError("Can only be performed on cloned repos.")
 
     def push_branches(self):
         for remote in self.mirrors:

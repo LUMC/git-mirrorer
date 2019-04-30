@@ -21,7 +21,7 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name="git-synchronizer",
-    version="0.1-dev",
+    version="0.1.0-dev",
     description="A program to sync git repositories with one another.",
     author="Leiden University Medical Center",
     author_email="sasc@lumc.nl",  # A placeholder for now

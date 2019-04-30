@@ -45,6 +45,27 @@ def test_clone(git_repository):
     assert git_repo.repo_dir.exists()
 
 
+def test_remotes():
+    clone_dir = Path(str(tempfile.mkdtemp(prefix="clone_dir"))) / Path(
+        "git-synchronizer.git")
+    mirror_url_one = empty_repo().working_dir
+    mirror_url_two = empty_repo().working_dir
+    git_repo = GitRepo(main_url=list(clone_this_repo().remote().urls)[0],
+                       mirror_urls=[mirror_url_one, mirror_url_two],
+                       repo_dir=clone_dir)
+    git_repo.clone()
+    assert mirror_url_one in [list(remote.urls)[0] for remote in
+                              git_repo.mirrors]
+    assert mirror_url_two in [list(remote.urls)[0] for remote in
+                              git_repo.mirrors]
+
+
+def test_remotes_existing(git_repository):
+    git_repository.clone()
+    git_repo = GitRepo(list(git_repository.repo.remote().urls)[0],
+                       repo_dir=Path(git_repository.repo.working_dir))
+    assert len(git_repo.mirrors) == 2
+
 # Will fail on travis due to git push failing.
 @pytest.mark.xfail
 def test_mirror(git_repository):
