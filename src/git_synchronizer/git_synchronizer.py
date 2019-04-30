@@ -68,7 +68,8 @@ class GitRepo(object):
     def add_mirror(self, mirror_url):
         if self.repo is not None:
             self.mirrors.append(
-                git.Remote.add(self.repo, string_to_md5(mirror_url), mirror_url)
+                git.Remote.add(self.repo, string_to_md5(mirror_url),
+                               mirror_url)
             )
 
         else:
